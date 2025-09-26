@@ -1,0 +1,38 @@
+# Arquivos de ambiente (NUNCA versionar)
+.env
+.env.local
+.env.production
+.env.staging
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Certificados (NUNCA versionar)
+*.pfx
+*.p12
+
+# Arquivos de saída
+pdfs/
+json_responses/
+
+# Arquivos Excel (podem conter dados sensíveis)
+*.xlsx
+*.xls
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
