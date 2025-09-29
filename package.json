@@ -2,9 +2,9 @@
   "name": "interface-serpro",
   "version": "1.0.0",
   "description": "Interface web para emissão de relatórios SERPRO",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "electron .",
     "dev": "nodemon server.js"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "electron": "^38.2.0",
     "nodemon": "^3.0.1"
   },
   "keywords": [

@@ -299,9 +299,11 @@ class AnalisadorParcelamentos:
                         })
 
                 # 2) PARCSN - Simples Nacional
-                if "SIMPLES NACIONAL - EM PARCELAMENTO" in texto:
-                    sn_match = re.search(r"SIMPLES NACIONAL - EM PARCELAMENTO\s+Parcelas em atraso\s*(\d+)", texto)
-                    if sn_match:
+                if "SIMPLES NACIONAL - EM PARCELAMENTO" in texto or "SIMPLES NACIONAL - RELP - EM PARCELAMENTO" in texto:
+                    sn_matches = re.findall(r"(SIMPLES NACIONAL.*EM PARCELAMENTO)(?:\s+Parcelas em atraso\s*(\d+))?", texto)
+                    for match in sn_matches:
+                        titulo, parcelas = match
+                        parcelas = parcelas if parcelas else "0"
                         dados.append({
                             "CNPJ": cnpj_formatado,
                             "CNPJ_Numeros": cnpj_numeros,
@@ -309,43 +311,78 @@ class AnalisadorParcelamentos:
                             "Tipo": "PARCSN",
                             "Subtipo": "Simples Nacional",
                             "Conta": "-",
-                            "Modalidade": "Simples Nacional - Parcelamento",
-                            "Detalhes": f"Parcelas em atraso: {sn_match.group(1)}",
+                            "Modalidade": titulo.strip(),
+                            "Detalhes": f"Parcelas em atraso: {parcelas}",
                             "Status": "Em Parcelamento",
                             "Valor": 0,
                             "Arquivo": nome_arquivo
                         })
 
+
                 # 3) SIEFPAR - Parcelamento com Exigibilidade Suspensa (Receita Federal)
-                if "Parcelamento com Exigibilidade Suspensa (SIEFPAR)" in texto:
-                    siefpar_pattern = r"Parcelamento:\s*(\d+)\s+Valor Suspenso:\s*([\d\.,]+)\s*(.+?)(?=Parcelamento:|$)"
-                    matches = re.findall(siefpar_pattern, texto, re.DOTALL)
-                    
-                    for parcela, valor_str, detalhes in matches:
-                        valor = self.extrair_valor_monetario(valor_str) if valor_str else 0
-                        modalidade = "Parcelamento Simplificado"
-                        if "Parcelamento Simplificado" in detalhes:
-                            modalidade = "Parcelamento Simplificado"
-                        
+                if "Pendência – Parcelamento (SIEFPAR)" in texto:
+                    pattern = r"Parcelamento:\s*(\d+)\s+Parcelas em Atraso:\s*(\d+)\s+Valor em Atraso:\s*([\d\.,]+)"
+                    matches = re.findall(pattern, texto)
+                    for conta, parcelas, valor_str in matches:
+                        valor = self.extrair_valor_monetario(valor_str)
                         dados.append({
+                            "Tipo": "SIEFPAR",
+                            "Subtipo": "Receita Federal",
+                            "Conta": conta.strip(),
+                            "Modalidade": "Parcelamento Simplificado",
+                            "Detalhes": f"Parcelas em atraso: {parcelas}, Valor em atraso: R$ {valor_str}",
+                            "Status": "Exigibilidade Suspensa",
+                            "Valor": valor,
+                            "Arquivo": nome_arquivo,
                             "CNPJ": cnpj_formatado,
                             "CNPJ_Numeros": cnpj_numeros,
                             "Nome_Empresa": nome_empresa,
+                        })
+
+                if "Parcelamento com Exigibilidade Suspensa (SIEFPAR)" in texto:
+                    pattern = r"Parcelamento:\s*(\d+)\s+Valor Suspenso:\s*([\d\.,]+)"
+                    matches = re.findall(pattern, texto)
+                    for conta, valor_str in matches:
+                        valor = self.extrair_valor_monetario(valor_str)
+                        dados.append({
                             "Tipo": "SIEFPAR",
                             "Subtipo": "Receita Federal",
-                            "Conta": parcela.strip(),
-                            "Modalidade": modalidade,
+                            "Conta": conta.strip(),
+                            "Modalidade": "Parcelamento Simplificado",
                             "Detalhes": f"Valor suspenso: R$ {valor_str}",
                             "Status": "Exigibilidade Suspensa",
                             "Valor": valor,
-                            "Arquivo": nome_arquivo
+                            "Arquivo": nome_arquivo,
+                            "CNPJ": cnpj_formatado,
+                            "CNPJ_Numeros": cnpj_numeros,
+                            "Nome_Empresa": nome_empresa,
                         })
 
-                # 4) SISPAR - Parcelamento com Exigibilidade Suspensa (PGFN)
-                if "Parcelamento com Exigibilidade Suspensa (SISPAR)" in texto:
-                    sispar_pattern = r"Conta\s+(\d+)\s+(.+?)\s+Modalidade:\s*(.+?)(?=\n|$)"
-                    matches = re.findall(sispar_pattern, texto, re.MULTILINE)
+                
+                # # 4) SISPAR - Parcelamento com Exigibilidade Suspensa (PGFN)
+                # if "Parcelamento com Exigibilidade Suspensa (SISPAR)" in texto:
+                #     sispar_pattern = r"Conta\s+(\d+)\s+([^\n]+?)\s+Modalidade:\s*([^\n]+)"
+                #     matches = re.findall(sispar_pattern, texto)
                     
+                #     for conta, tipo_parcela, modalidade in matches:
+                #         dados.append({
+                #             "CNPJ": cnpj_formatado,
+                #             "CNPJ_Numeros": cnpj_numeros,
+                #             "Nome_Empresa": nome_empresa,
+                #             "Tipo": "SISPAR",
+                #             "Subtipo": "PGFN",
+                #             "Conta": conta.strip(),
+                #             "Modalidade": modalidade.strip(),
+                #             "Detalhes": tipo_parcela.strip(),
+                #             "Status": "Exigibilidade Suspensa",
+                #             "Valor": 0,
+                #             "Arquivo": nome_arquivo
+                #         })
+
+                if "SISPAR" in texto:
+                    sispar_pattern = r"(?:Conta\s*)?(\d+)\s+([^\n]+)\nModalidade:\s*([^\n]+)"
+                    matches = re.findall(sispar_pattern, texto)
+
                     for conta, tipo_parcela, modalidade in matches:
                         dados.append({
                             "CNPJ": cnpj_formatado,
@@ -360,6 +397,9 @@ class AnalisadorParcelamentos:
                             "Valor": 0,
                             "Arquivo": nome_arquivo
                         })
+
+
+
 
                 # 5) SICOB - Débito com Exigibilidade Suspensa
                 if "Débito com Exigibilidade Suspensa (SICOB)" in texto:

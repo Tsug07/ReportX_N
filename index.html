@@ -1,467 +1,543 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emitir Relatórios SERPRO</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emitir Relatórios SERPRO</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f6fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 500px;
-        }
+    /* 🔹 Barra superior estilo app */
+    .titlebar {
+      -webkit-app-region: drag;
+      height: 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-weight: 600;
+      font-size: 14px;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+    .titlebar img {
+      height: 22px;
+      margin-right: 8px;
+      -webkit-app-region: no-drag;
+    }
 
-        .header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
+    .titlebar span {
+      flex: 1;
+    }
 
-        .header p {
-            color: #666;
-            font-size: 16px;
-        }
+    .titlebar .buttons {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+      -webkit-app-region: no-drag;
+    }
 
-        .form-group {
-            margin-bottom: 25px;
-        }
+    .titlebar button {
+      border: none;
+      background: transparent;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
+    .titlebar button:hover {
+      transform: scale(1.2);
+    }
 
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
+    /* 🔹 Container principal - layout horizontal */
+    .container {
+      flex: 1;
+      background: white;
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+    }
 
-        .file-input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
+    .form-section {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
 
-        .file-input-button, .folder-select-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 20px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            color: #6c757d;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 10px;
-        }
+    .logs-section {
+      flex: 1;
+      padding: 20px;
+      background: #f8f9fa;
+      border-left: 2px solid #e9ecef;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .file-input-button:hover, .folder-select-button:hover {
-            background: #e9ecef;
-            border-color: #adb5bd;
-        }
+    .header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
 
-        .file-input-button.has-file, .folder-select-button.has-folder {
-            background: #d4edda;
-            border-color: #28a745;
-            color: #155724;
-        }
+    .header h1 {
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
 
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
+    .header p {
+      color: #666;
+      font-size: 13px;
+    }
 
-        input[type="text"]:focus, input[type="password"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+    .form-group {
+      margin-bottom: 12px;
+    }
 
-        .hint {
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: 5px;
-        }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 500;
+      font-size: 13px;
+    }
 
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            margin-top: 20px;
-        }
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
 
-        .submit-btn:hover {
-            transform: translateY(-2px);
-        }
+    .file-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
 
-        .submit-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
+    .file-input-button, .folder-select-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 15px;
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      color: #6c757d;
+      font-size: 13px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 5px;
+    }
 
-        .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
-            color: #667eea;
-        }
+    .file-input-button:hover, .folder-select-button:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
 
-        .status {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            display: none;
-        }
+    .file-input-button.has-file, .folder-select-button.has-folder {
+      background: #d4edda;
+      border-color: #28a745;
+      color: #155724;
+    }
 
-        .status h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 13px;
+      transition: border-color 0.3s ease;
+    }
 
-        .status-content {
-            max-height: 200px;
-            overflow-y: auto;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-        }
+    input[type="text"]:focus, input[type="password"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
 
-        .success-log {
-            color: #28a745;
-        }
+    .hint {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 5px;
+    }
 
-        .error-log {
-            color: #dc3545;
-        }
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      margin-top: 10px;
+    }
 
-        .folder-input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    .submit-btn:hover {
+      transform: translateY(-2px);
+    }
 
-        .manual-input {
-            display: none;
-        }
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-        .toggle-manual {
-            background: none;
-            border: none;
-            color: #667eea;
-            text-decoration: underline;
-            cursor: pointer;
-            font-size: 12px;
-            align-self: flex-start;
-        }
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+      color: #667eea;
+    }
 
-        .selected-path {
-            background: #e3f2fd;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            color: #1976d2;
-            margin-top: 5px;
-            word-break: break-all;
-        }
+    .status {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      height: 100%;
+    }
 
-        @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            .header h1 {
-                font-size: 24px;
-            }
-        }
-    </style>
+    .status h3 {
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .status-content {
+      flex: 1;
+      overflow-y: auto;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      border: 1px solid #dee2e6;
+    }
+
+    .success-log {
+      color: #28a745;
+    }
+
+    .error-log {
+      color: #dc3545;
+    }
+
+    .folder-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .manual-input {
+      display: none;
+    }
+
+    .toggle-manual {
+      background: none;
+      border: none;
+      color: #667eea;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 12px;
+      align-self: flex-start;
+    }
+
+    .selected-path {
+      background: #e3f2fd;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      color: #1976d2;
+      margin-top: 5px;
+      word-break: break-all;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 14px;
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 Emitir Relatórios</h1>
-            <p>Sistema de emissão automática via SERPRO</p>
+  <!-- Barra superior -->
+  <div class="titlebar">
+    <img src="logo.png" alt="Logo">
+    <span>RelaEcac</span>
+    <div class="buttons">
+      <button onclick="window.close()">✖</button>
+    </div>
+  </div>
+
+  <!-- Conteúdo -->
+  <div class="container">
+    <!-- Seção do Formulário -->
+    <div class="form-section">
+      <div class="header">
+        <h1>Rela-Ecac</h1>
+        <p>Sistema de emissão de relatório fiscal automática via SERPRO</p>
+      </div>
+
+      <form id="relatoriosForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>📜 Certificado Digital (.pfx)</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="certificado" name="certificado" accept=".pfx" class="file-input">
+            <div class="file-input-button" id="certificadoButton">
+              📁 Clique para selecionar novo certificado (opcional)
+            </div>
+          </div>
+          <div class="hint">Deixe em branco para usar o certificado atual</div>
         </div>
 
-        <form id="relatoriosForm" enctype="multipart/form-data">
-            <div class="form-group">
-                <label>📜 Certificado Digital (.pfx)</label>
-                <div class="file-input-wrapper">
-                    <input type="file" id="certificado" name="certificado" accept=".pfx" class="file-input">
-                    <div class="file-input-button" id="certificadoButton">
-                        📁 Clique para selecionar novo certificado (opcional)
-                    </div>
-                </div>
-                <div class="hint">Deixe em branco para usar o certificado atual</div>
-            </div>
+        <div class="form-group">
+          <label for="senha">🔒 Senha do Certificado</label>
+          <input type="password" id="senha" name="senha" placeholder="Digite a senha do certificado">
+        </div>
 
-            <div class="form-group">
-                <label for="senha">🔑 Senha do Certificado</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite a senha do certificado">
-            </div>
-
-            <div class="form-group">
-                <label>📁 Pasta para Salvar PDFs</label>
-                <div class="folder-input-group">
-                    <button type="button" class="folder-select-button" id="folderSelectBtn">
-                        📁 Clique para selecionar a pasta
-                    </button>
-                    <div class="selected-path" id="selectedPath" style="display: none;"></div>
-                    <button type="button" class="toggle-manual" id="toggleManual">
-                        Ou digite o caminho manualmente
-                    </button>
-                    <div class="manual-input" id="manualInput">
-                        <input type="text" id="pdfDir" name="pdfDir" placeholder="Ex: C:\Relatorios ou relatorios_2024">
-                        <div class="hint">Caminho absoluto (C:\pasta) ou relativo (nome_pasta)</div>
-                    </div>
-                </div>
-                <div class="hint">Deixe em branco para usar a pasta padrão 'pdfs'</div>
-                <input type="hidden" id="selectedFolderPath" name="selectedFolderPath">
-            </div>
-
-            <div class="form-group">
-                <label>📊 Arquivo Excel (.xlsx)</label>
-                <div class="file-input-wrapper">
-                    <input type="file" id="excel" name="excel" accept=".xlsx,.xls" class="file-input" required>
-                    <div class="file-input-button" id="excelButton">
-                        📁 Clique para selecionar o arquivo Excel
-                    </div>
-                </div>
-                <div class="hint">Lista de empresas (CNPJs na coluna B)</div>
-            </div>
-
-            <button type="submit" class="submit-btn" id="submitBtn">
-                ⚡ Processar Relatórios
+        <div class="form-group">
+          <label>📁 Pasta para Salvar PDFs</label>
+          <div class="folder-input-group">
+            <button type="button" class="folder-select-button" id="folderSelectBtn">
+              📂 Clique para selecionar a pasta
             </button>
-        </form>
-
-        <div class="loading" id="loading">
-            <p>Processando relatórios...</p>
+            <div class="selected-path" id="selectedPath" style="display: none;"></div>
+            <button type="button" class="toggle-manual" id="toggleManual">
+              Ou digite o caminho manualmente
+            </button>
+            <div class="manual-input" id="manualInput">
+              <input type="text" id="pdfDir" name="pdfDir" placeholder="Ex: C:\Relatorios ou relatorios_2024">
+              <div class="hint">Caminho absoluto (C:\pasta) ou relativo (nome_pasta)</div>
+            </div>
+          </div>
+          <div class="hint">Deixe em branco para usar a pasta padrão 'pdfs'</div>
+          <input type="hidden" id="selectedFolderPath" name="selectedFolderPath">
         </div>
 
-        <div class="status" id="status">
-            <h3>📋 Status do Processamento</h3>
-            <div class="status-content success-log" id="successLog"></div>
-            <div class="status-content error-log" id="errorLog"></div>
+        <div class="form-group">
+          <label>📊 Arquivo Excel (.xlsx)</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="excel" name="excel" accept=".xlsx,.xls" class="file-input" required>
+            <div class="file-input-button" id="excelButton">
+              📁 Clique para selecionar o arquivo Excel
+            </div>
+          </div>
+          <div class="hint">Lista de empresas (CNPJs na coluna C)</div>
         </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          ⚡ Processar Relatórios
+        </button>
+      </form>
+
+      <div class="loading" id="loading">
+        <p>Processando relatórios...</p>
+      </div>
     </div>
 
-    <script>
-        let selectedFolderHandle = null;
+    <!-- Seção de Logs -->
+    <div class="logs-section">
+      <div class="status" id="status">
+        <div>
+          <h3>✅ Sucessos</h3>
+          <div class="status-content success-log" id="successLog">Aguardando processamento...</div>
+        </div>
+        <div>
+          <h3>❌ Erros</h3>
+          <div class="status-content error-log" id="errorLog">Nenhum erro registrado...</div>
+        </div>
+      </div>
+      <div class="empty-state" id="emptyState">
+        📋 Os logs aparecerão aqui durante o processamento
+      </div>
+    </div>
+  </div>
 
-        // Verificar se o navegador suporta seleção de pasta
-        const supportsFolderPicker = 'showDirectoryPicker' in window;
+  <script>
+    let selectedFolderHandle = null;
+    const supportsFolderPicker = 'showDirectoryPicker' in window;
 
-        // Gerenciar display dos arquivos selecionados
-        document.getElementById('certificado').addEventListener('change', function(e) {
-            const button = document.getElementById('certificadoButton');
-            if (e.target.files.length > 0) {
-                button.textContent = `📜 ${e.target.files[0].name}`;
-                button.classList.add('has-file');
-            } else {
-                button.textContent = '📁 Clique para selecionar novo certificado (opcional)';
-                button.classList.remove('has-file');
-            }
-        });
+    // Certificado
+    document.getElementById('certificado').addEventListener('change', function(e) {
+      const button = document.getElementById('certificadoButton');
+      if (e.target.files.length > 0) {
+        button.textContent = `📜 ${e.target.files[0].name}`;
+        button.classList.add('has-file');
+      } else {
+        button.textContent = '📁 Clique para selecionar novo certificado (opcional)';
+        button.classList.remove('has-file');
+      }
+    });
 
-        document.getElementById('excel').addEventListener('change', function(e) {
-            const button = document.getElementById('excelButton');
-            if (e.target.files.length > 0) {
-                button.textContent = `📊 ${e.target.files[0].name}`;
-                button.classList.add('has-file');
-            } else {
-                button.textContent = '📁 Clique para selecionar o arquivo Excel';
-                button.classList.remove('has-file');
-            }
-        });
+    // Excel
+    document.getElementById('excel').addEventListener('change', function(e) {
+      const button = document.getElementById('excelButton');
+      if (e.target.files.length > 0) {
+        button.textContent = `📊 ${e.target.files[0].name}`;
+        button.classList.add('has-file');
+      } else {
+        button.textContent = '📁 Clique para selecionar o arquivo Excel';
+        button.classList.remove('has-file');
+      }
+    });
 
-        // Seleção de pasta
-        document.getElementById('folderSelectBtn').addEventListener('click', async function() {
-            if (supportsFolderPicker) {
-                try {
-                    selectedFolderHandle = await window.showDirectoryPicker();
-                    const folderName = selectedFolderHandle.name;
-                    
-                    // Atualizar UI
-                    const button = document.getElementById('folderSelectBtn');
-                    const pathDiv = document.getElementById('selectedPath');
-                    const hiddenInput = document.getElementById('selectedFolderPath');
-                    
-                    button.textContent = `📁 ${folderName}`;
-                    button.classList.add('has-folder');
-                    pathDiv.textContent = `Pasta selecionada: ${folderName}`;
-                    pathDiv.style.display = 'block';
-                    
-                    // Guardar o nome da pasta para enviar ao servidor
-                    hiddenInput.value = folderName;
-                    
-                } catch (error) {
-                    if (error.name !== 'AbortError') {
-                        alert('Erro ao selecionar pasta: ' + error.message);
-                    }
-                }
-            } else {
-                alert('Seu navegador não suporta seleção de pasta. Use o campo manual abaixo.');
-                document.getElementById('toggleManual').click();
-            }
-        });
+    // Seleção de pasta
+    document.getElementById('folderSelectBtn').addEventListener('click', async function() {
+      if (supportsFolderPicker) {
+        try {
+          selectedFolderHandle = await window.showDirectoryPicker();
+          const folderName = selectedFolderHandle.name;
 
-        // Toggle entre seleção e campo manual
-        document.getElementById('toggleManual').addEventListener('click', function() {
-            const manualInput = document.getElementById('manualInput');
-            const isVisible = manualInput.style.display !== 'none';
-            
-            if (isVisible) {
-                manualInput.style.display = 'none';
-                this.textContent = 'Ou digite o caminho manualmente';
-            } else {
-                manualInput.style.display = 'block';
-                this.textContent = 'Usar seletor de pasta';
-                document.getElementById('pdfDir').focus();
-            }
-        });
+          const button = document.getElementById('folderSelectBtn');
+          const pathDiv = document.getElementById('selectedPath');
+          const hiddenInput = document.getElementById('selectedFolderPath');
 
-        // Carregar configurações atuais
-        async function carregarConfiguracoes() {
-            try {
-                const response = await fetch('/config');
-                const config = await response.json();
-                
-                if (config.certPassword) {
-                    document.getElementById('senha').value = config.certPassword;
-                }
-                
-                if (config.pdfDir) {
-                    document.getElementById('pdfDir').value = config.pdfDir;
-                }
-            } catch (error) {
-                console.error('Erro ao carregar configurações:', error);
-            }
+          button.textContent = `📂 ${folderName}`;
+          button.classList.add('has-folder');
+          pathDiv.textContent = `Pasta selecionada: ${folderName}`;
+          pathDiv.style.display = 'block';
+
+          hiddenInput.value = folderName;
+        } catch (error) {
+          if (error.name !== 'AbortError') {
+            alert('Erro ao selecionar pasta: ' + error.message);
+          }
         }
+      } else {
+        alert('Seu navegador não suporta seleção de pasta. Use o campo manual abaixo.');
+        document.getElementById('toggleManual').click();
+      }
+    });
 
-        // Submissão do formulário
-        document.getElementById('relatoriosForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            
-            // Verificar qual caminho usar: selecionado ou manual
-            const selectedPath = document.getElementById('selectedFolderPath').value;
-            const manualPath = document.getElementById('pdfDir').value;
-            
-            if (selectedPath) {
-                formData.set('pdfDir', selectedPath);
-            } else if (manualPath) {
-                formData.set('pdfDir', manualPath);
-            }
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
-            
-            submitBtn.disabled = true;
-            loading.style.display = 'block';
-            
-            try {
-                const response = await fetch('/processar', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    alert('✅ ' + result.message);
-                    iniciarMonitoramento();
-                } else {
-                    alert('❌ ' + result.message);
-                }
-            } catch (error) {
-                alert('❌ Erro: ' + error.message);
-            } finally {
-                submitBtn.disabled = false;
-                loading.style.display = 'none';
-            }
+    // Toggle manual
+    document.getElementById('toggleManual').addEventListener('click', function() {
+      const manualInput = document.getElementById('manualInput');
+      const isVisible = manualInput.style.display !== 'none';
+
+      if (isVisible) {
+        manualInput.style.display = 'none';
+        this.textContent = 'Ou digite o caminho manualmente';
+      } else {
+        manualInput.style.display = 'block';
+        this.textContent = 'Usar seletor de pasta';
+        document.getElementById('pdfDir').focus();
+      }
+    });
+
+    // Carregar config
+    async function carregarConfiguracoes() {
+      try {
+        const response = await fetch('/config');
+        const config = await response.json();
+        if (config.certPassword) document.getElementById('senha').value = config.certPassword;
+        if (config.pdfDir) document.getElementById('pdfDir').value = config.pdfDir;
+      } catch (error) {
+        console.error('Erro ao carregar configurações:', error);
+      }
+    }
+
+    // Submit
+    document.getElementById('relatoriosForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+
+      const selectedPath = document.getElementById('selectedFolderPath').value;
+      const manualPath = document.getElementById('pdfDir').value;
+
+      if (selectedPath) {
+        formData.set('pdfDir', selectedPath);
+      } else if (manualPath) {
+        formData.set('pdfDir', manualPath);
+      }
+
+      const submitBtn = document.getElementById('submitBtn');
+      const loading = document.getElementById('loading');
+
+      submitBtn.disabled = true;
+      loading.style.display = 'block';
+
+      try {
+        const response = await fetch('/processar', {
+          method: 'POST',
+          body: formData
         });
 
-        // Monitoramento de status
-        function iniciarMonitoramento() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.style.display = 'block';
-            
-            const intervalo = setInterval(async () => {
-                try {
-                    const response = await fetch('/status');
-                    const status = await response.json();
-                    
-                    document.getElementById('successLog').textContent = status.success || 'Nenhum log de sucesso ainda...';
-                    document.getElementById('errorLog').textContent = status.errors || 'Nenhum erro registrado...';
-                } catch (error) {
-                    console.error('Erro ao buscar status:', error);
-                }
-            }, 3000);
-            
-            // Parar monitoramento após 5 minutos
-            setTimeout(() => clearInterval(intervalo), 300000);
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ ' + result.message);
+          iniciarMonitoramento();
+        } else {
+          alert('❌ ' + result.message);
         }
+      } catch (error) {
+        alert('❌ Erro: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        loading.style.display = 'none';
+      }
+    });
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            // Se o navegador não suporta seleção de pasta, mostrar campo manual por padrão
-            if (!supportsFolderPicker) {
-                document.getElementById('folderSelectBtn').textContent = '📁 Seleção de pasta não suportada';
-                document.getElementById('folderSelectBtn').style.opacity = '0.5';
-                document.getElementById('toggleManual').click();
-            }
-            
-            carregarConfiguracoes();
-        });
-    </script>
+    // Monitoramento de status
+    function iniciarMonitoramento() {
+      const statusDiv = document.getElementById('status');
+      const emptyState = document.getElementById('emptyState');
+      
+      statusDiv.style.display = 'flex';
+      emptyState.style.display = 'none';
+
+      const intervalo = setInterval(async () => {
+        try {
+          const response = await fetch('/status');
+          const status = await response.json();
+
+          document.getElementById('successLog').textContent = status.success || 'Nenhum log de sucesso ainda...';
+          document.getElementById('errorLog').textContent = status.errors || 'Nenhum erro registrado...';
+
+          if (status.success && status.success.includes('✅ Processamento concluído')) {
+            alert('🎉 Processamento finalizado!');
+            clearInterval(intervalo);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar status:', error);
+        }
+      }, 3000);
+
+      setTimeout(() => clearInterval(intervalo), 300000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!supportsFolderPicker) {
+        document.getElementById('folderSelectBtn').textContent = '📂 Seleção de pasta não suportada';
+        document.getElementById('folderSelectBtn').style.opacity = '0.5';
+        document.getElementById('toggleManual').click();
+      }
+      carregarConfiguracoes();
+    });
+  </script>
 </body>
 </html>

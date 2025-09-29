@@ -137,22 +137,36 @@ app.post('/processar', upload.fields([
     }
 
     fs.writeFileSync('RelaEcac.js', codigo);
+    // Limpar logs antigos antes de iniciar novo processamento
+    if (!fs.existsSync('logs')) {
+      fs.mkdirSync('logs');
+    }
+    fs.writeFileSync('logs/success.log', '');
+    fs.writeFileSync('logs/errors.log', '');
 
     // Executar o script
     const processo = exec('node RelaEcac.js', (error, stdout, stderr) => {
-      if (error) {
-        console.error('Erro na execução:', error);
-        return;
-      }
-      console.log('Saída:', stdout);
-      if (stderr) console.error('Erro:', stderr);
-    });
+    if (error) {
+      console.error('Erro na execução:', error);
+      fs.appendFileSync('logs/errors.log', `\n❌ Erro na execução: ${error.message}\n`);
+      return;
+    }
+    console.log('Saída:', stdout);
+    if (stderr) {
+      console.error('Erro:', stderr);
+      fs.appendFileSync('logs/errors.log', `\n⚠️ Stderr: ${stderr}\n`);
+    }
+    fs.appendFileSync('logs/success.log', '\n✅ Processamento concluído com sucesso!\n');
+  });
+
 
     // Enviar resposta imediata
     res.json({ 
       success: true, 
       message: 'Processamento iniciado! Acompanhe o progresso no console.' 
     });
+
+    
 
   } catch (error) {
     console.error('Erro ao processar:', error);
