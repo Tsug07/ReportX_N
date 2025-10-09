@@ -7,14 +7,22 @@ const { exec } = require('child_process');
 const app = express();
 const port = 3000;
 
-// Configuração do multer para upload de arquivos
+// ✅ Detecta se o app está empacotado (instalador)
+const isPackaged = process.mainModule?.filename.indexOf('app.asar') !== -1;
+
+// ✅ Corrige caminho base: usa process.resourcesPath dentro do instalador
+const basePath = isPackaged ? process.resourcesPath : __dirname;
+console.log('📦 BasePath:', basePath);
+
+// ===============================
+// 🔧 Configuração do multer (upload)
+// ===============================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, __dirname);
+    cb(null, basePath); // ✅ salva os arquivos no caminho correto
   },
   filename: (req, file, cb) => {
     if (file.fieldname === 'certificado') {
-      // Mantém o nome original do certificado
       cb(null, file.originalname);
     } else if (file.fieldname === 'excel') {
       cb(null, 'empresas_filtradas.xlsx');
@@ -22,183 +30,139 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // Middleware
-app.use(express.static('public'));
+app.use(express.static(path.join(basePath, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rota principal
+// ===============================
+// 🌐 Rota principal
+// ===============================
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(basePath, 'index.html'));
 });
 
-// Função para ler configurações atuais do RelaEcac.js
+// ===============================
+// ⚙️ Leitura de configuração atual do RelaEcac.js
+// ===============================
 function lerConfiguracaoAtual() {
+  const relaPath = path.join(basePath, 'RelaEcac.js'); // ✅ caminho corrigido
   try {
-    const codigo = fs.readFileSync('RelaEcac.js', 'utf8');
-    
+    const codigo = fs.readFileSync(relaPath, 'utf8');
     const certPath = codigo.match(/const CERT_PATH = .*?"([^"]+)"/)?.[1] || '';
     const certPassword = codigo.match(/const CERT_PASSWORD = "([^"]*)"/)?.[1] || '';
     const consumerKey = codigo.match(/const CONSUMER_KEY = "([^"]*)"/)?.[1] || '';
     const consumerSecret = codigo.match(/const CONSUMER_SECRET = "([^"]*)"/)?.[1] || '';
-    
-    // Ler pasta de PDFs atual
     const pdfDirMatch = codigo.match(/const pdfDir = path\.join\(__dirname,\s*"([^"]+)"\)/);
     const pdfDir = pdfDirMatch ? pdfDirMatch[1] : 'pdfs';
-    
-    return {
-      certPath: path.basename(certPath),
-      certPassword,
-      consumerKey,
-      consumerSecret,
-      pdfDir
-    };
-  } catch (error) {
-    return {
-      certPath: '',
-      certPassword: '',
-      consumerKey: '',
-      consumerSecret: '',
-      pdfDir: 'pdfs'
-    };
+    return { certPath: path.basename(certPath), certPassword, consumerKey, consumerSecret, pdfDir };
+  } catch {
+    return { certPath: '', certPassword: '', consumerKey: '', consumerSecret: '', pdfDir: 'pdfs' };
   }
 }
 
-// Rota para obter configurações atuais
 app.get('/config', (req, res) => {
-  const config = lerConfiguracaoAtual();
-  res.json(config);
+  res.json(lerConfiguracaoAtual());
 });
 
-// Rota para upload e processamento
-app.post('/processar', upload.fields([
-  { name: 'certificado', maxCount: 1 },
-  { name: 'excel', maxCount: 1 }
-]), (req, res) => {
-  const { senha, pdfDir, selectedFolderPath } = req.body;
-  
-  if (!req.files.excel) {
-    return res.status(400).json({ 
-      success: false, 
-      message: 'Por favor, selecione o arquivo Excel.' 
-    });
-  }
+// ===============================
+// 🚀 Upload e processamento
+// ===============================
+app.post(
+  '/processar',
+  upload.fields([
+    { name: 'certificado', maxCount: 1 },
+    { name: 'excel', maxCount: 1 },
+  ]),
+  (req, res) => {
+    const { senha, pdfDir, selectedFolderPath } = req.body;
 
-  const excelPath = req.files.excel[0].path;
-  let certificadoPath = null;
-  
-  // Se um novo certificado foi enviado, usar ele
-  if (req.files.certificado && req.files.certificado[0]) {
-    certificadoPath = req.files.certificado[0].path;
-  }
-
-  // Determinar qual pasta usar
-  let pastaPdf = selectedFolderPath || pdfDir;
-
-  // Atualizar o arquivo RelaEcac.js com os novos valores
-  try {
-    let codigo = fs.readFileSync('RelaEcac.js', 'utf8');
-    
-    // Só atualizar certificado se um novo foi enviado
-    if (certificadoPath) {
-      codigo = codigo.replace(
-        /const CERT_PATH = .*?;/,
-        `const CERT_PATH = path.join(__dirname, "${path.basename(certificadoPath)}");`
-      );
-    }
-    
-    // Só atualizar senha se foi fornecida
-    if (senha) {
-      codigo = codigo.replace(
-        /const CERT_PASSWORD = .*?;/,
-        `const CERT_PASSWORD = "${senha}";`
-      );
+    if (!req.files.excel) {
+      return res.status(400).json({ success: false, message: 'Por favor, selecione o arquivo Excel.' });
     }
 
-    // Atualizar pasta de PDFs se foi fornecida
-    if (pastaPdf && pastaPdf.trim()) {
-      // Para nomes de pasta simples (como selecionados pelo picker), criar na pasta do projeto
-      // Para caminhos completos, usar como está
-      let novoCaminhoCode;
-      if (path.isAbsolute(pastaPdf)) {
-        novoCaminhoCode = `const pdfDir = "${pastaPdf.replace(/\\/g, '\\\\')}";`;
-      } else {
-        novoCaminhoCode = `const pdfDir = path.join(__dirname, "${pastaPdf}");`;
+    const excelPath = req.files.excel[0].path;
+    let certificadoPath = req.files.certificado?.[0]?.path || null;
+    let pastaPdf = selectedFolderPath || pdfDir;
+
+    try {
+      const relaPath = path.join(basePath, 'RelaEcac.js'); // ✅ caminho correto
+      let codigo = fs.readFileSync(relaPath, 'utf8');
+
+      if (certificadoPath) {
+        codigo = codigo.replace(
+          /const CERT_PATH = .*?;/,
+          `const CERT_PATH = path.join(__dirname, "${path.basename(certificadoPath)}");`
+        );
       }
-      
-      codigo = codigo.replace(
-        /const pdfDir = .*?;/,
-        novoCaminhoCode
-      );
-      
-      console.log(`📁 Pasta de PDFs atualizada para: ${pastaPdf}`);
+      if (senha) {
+        codigo = codigo.replace(/const CERT_PASSWORD = .*?;/, `const CERT_PASSWORD = "${senha}";`);
+      }
+
+      if (pastaPdf && pastaPdf.trim()) {
+        const novoCaminhoCode = path.isAbsolute(pastaPdf)
+          ? `const pdfDir = "${pastaPdf.replace(/\\/g, '\\\\')}";`
+          : `const pdfDir = path.join(__dirname, "${pastaPdf}");`;
+        codigo = codigo.replace(/const pdfDir = .*?;/, novoCaminhoCode);
+      }
+
+      fs.writeFileSync(relaPath, codigo);
+
+      // ✅ Garante que a pasta de logs existe no basePath
+      const logsDir = path.join(basePath, 'logs');
+      if (!fs.existsSync(logsDir)) fs.mkdirSync(logsDir, { recursive: true });
+      fs.writeFileSync(path.join(logsDir, 'success.log'), '');
+      fs.writeFileSync(path.join(logsDir, 'errors.log'), '');
+
+      // ✅ Executa RelaEcac.js usando caminho absoluto
+      const cmd = `node "${path.join(basePath, 'RelaEcac.js')}"`;
+      console.log('▶️ Executando:', cmd);
+      const processo = exec(cmd, (error, stdout, stderr) => {
+        if (error) {
+          console.error('Erro na execução:', error);
+          fs.appendFileSync(path.join(logsDir, 'errors.log'), `\n❌ Erro: ${error.message}\n`);
+          return;
+        }
+        if (stderr) {
+          console.error('Stderr:', stderr);
+          fs.appendFileSync(path.join(logsDir, 'errors.log'), `\n⚠️ ${stderr}\n`);
+        }
+        fs.appendFileSync(path.join(logsDir, 'success.log'), '\n✅ Processamento concluído!\n');
+        console.log(stdout);
+      });
+
+      res.json({ success: true, message: 'Processamento iniciado! Confira o console.' });
+    } catch (error) {
+      console.error('Erro ao processar:', error);
+      res.status(500).json({ success: false, message: 'Erro interno: ' + error.message });
     }
-
-    fs.writeFileSync('RelaEcac.js', codigo);
-    // Limpar logs antigos antes de iniciar novo processamento
-    if (!fs.existsSync('logs')) {
-      fs.mkdirSync('logs');
-    }
-    fs.writeFileSync('logs/success.log', '');
-    fs.writeFileSync('logs/errors.log', '');
-
-    // Executar o script
-    const processo = exec('node RelaEcac.js', (error, stdout, stderr) => {
-    if (error) {
-      console.error('Erro na execução:', error);
-      fs.appendFileSync('logs/errors.log', `\n❌ Erro na execução: ${error.message}\n`);
-      return;
-    }
-    console.log('Saída:', stdout);
-    if (stderr) {
-      console.error('Erro:', stderr);
-      fs.appendFileSync('logs/errors.log', `\n⚠️ Stderr: ${stderr}\n`);
-    }
-    fs.appendFileSync('logs/success.log', '\n✅ Processamento concluído com sucesso!\n');
-  });
-
-
-    // Enviar resposta imediata
-    res.json({ 
-      success: true, 
-      message: 'Processamento iniciado! Acompanhe o progresso no console.' 
-    });
-
-    
-
-  } catch (error) {
-    console.error('Erro ao processar:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Erro interno do servidor: ' + error.message 
-    });
   }
-});
+);
 
-// Rota para verificar status (logs)
+// ===============================
+// 📊 Status dos logs
+// ===============================
 app.get('/status', (req, res) => {
+  const logsDir = path.join(basePath, 'logs');
   try {
-    const successLog = fs.existsSync('logs/success.log') 
-      ? fs.readFileSync('logs/success.log', 'utf8').split('\n').slice(-10).join('\n')
+    const successLog = fs.existsSync(path.join(logsDir, 'success.log'))
+      ? fs.readFileSync(path.join(logsDir, 'success.log'), 'utf8').split('\n').slice(-10).join('\n')
       : '';
-    
-    const errorLog = fs.existsSync('logs/errors.log') 
-      ? fs.readFileSync('logs/errors.log', 'utf8').split('\n').slice(-10).join('\n')
+    const errorLog = fs.existsSync(path.join(logsDir, 'errors.log'))
+      ? fs.readFileSync(path.join(logsDir, 'errors.log'), 'utf8').split('\n').slice(-10).join('\n')
       : '';
-
-    res.json({
-      success: successLog,
-      errors: errorLog
-    });
-  } catch (error) {
+    res.json({ success: successLog, errors: errorLog });
+  } catch {
     res.status(500).json({ error: 'Erro ao ler logs' });
   }
 });
 
-// Iniciar servidor
+// ===============================
+// 🚀 Inicialização
+// ===============================
 app.listen(port, () => {
   console.log(`🌐 Servidor rodando em http://localhost:${port}`);
-  console.log('📁 Certifique-se de que o arquivo RelaEcac.js está na mesma pasta');
+  console.log('📁 RelaEcac.js e arquivos de trabalho no basePath:', basePath);
 });

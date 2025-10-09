@@ -5,26 +5,40 @@ const { fork } = require('child_process');
 let mainWindow;
 let serverProcess;
 
+// ✅ Detecta se está rodando empacotado (instalador) ou em dev
+const isPackaged = app.isPackaged;
+
+// ✅ Corrige caminhos de recursos
+// process.resourcesPath aponta para /resources/ dentro do instalador
+const basePath = isPackaged ? process.resourcesPath : __dirname;
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 650,
-    frame: false, // barra personalizada
-    icon: path.join(__dirname, 'public', 'icon.ico'), // 👉 use o .ico aqui
+    frame: false,
+    icon: path.join(basePath, 'public', 'icon.ico'), // garante que o ícone seja encontrado
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   });
 
-  mainWindow.loadURL("http://localhost:3000");
+  if (isPackaged) {
+    // ✅ No instalador: abre o index.html do build (sem localhost)
+    mainWindow.loadFile(path.join(basePath, 'index.html'));
+  } else {
+    // ✅ Em desenvolvimento: carrega o servidor local
+    mainWindow.loadURL('http://localhost:3000');
+  }
 }
 
-
 app.whenReady().then(() => {
-  console.log("🚀 Iniciando servidor interno...");
-  // Inicia o servidor Node.js
-  serverProcess = fork(path.join(__dirname, 'server.js'));
+  console.log('🚀 Iniciando servidor interno...');
+  
+  // ✅ Corrige caminho do servidor.js para o modo empacotado
+  const serverPath = path.join(basePath, 'server.js');
+  serverProcess = fork(serverPath);
 
   createWindow();
 
@@ -41,7 +55,7 @@ app.on('window-all-closed', () => {
 
 app.on('quit', () => {
   if (serverProcess) {
-    serverProcess.kill(); // encerra o servidor junto com o app
-    console.log("🛑 Servidor encerrado.");
+    serverProcess.kill();
+    console.log('🛑 Servidor encerrado.');
   }
 });
