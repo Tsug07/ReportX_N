@@ -9,17 +9,15 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 900,
     height: 650,
-    resizable: false, // impede redimensionamento
-    frame: false, // remove barra nativa
-    icon: path.join(__dirname, 'icon.png'),
+    frame: false, // barra personalizada
+    icon: path.join(__dirname, 'public', 'icon.ico'), // 👉 use o .ico aqui
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   });
 
-  const startUrl = "http://localhost:3000";
-  mainWindow.loadURL(startUrl);
+  mainWindow.loadURL("http://localhost:3000");
 }
 
 

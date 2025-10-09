@@ -11,8 +11,8 @@ require('dotenv').config();
 // ==========================
 // CONFIGURAÇÕES (usando .env)
 // ==========================
-const CERT_PATH = path.join(__dirname, "102 - CANELLA & SANTOS CONTABILIDADE LTDA - SENHA 123456 - V 28.03.2026.pfx");
-const CERT_PASSWORD = "123456";
+const CERT_PATH = path.join(__dirname, "");
+const CERT_PASSWORD = "";
 const AUTH_URL = process.env.AUTH_URL || "https://autenticacao.sapi.serpro.gov.br/authenticate";
 const CONSUMER_KEY = process.env.CONSUMER_KEY;
 const CONSUMER_SECRET = process.env.CONSUMER_SECRET;
@@ -20,7 +20,7 @@ const CONSUMER_SECRET = process.env.CONSUMER_SECRET;
 const API_URL_APOIAR = process.env.API_URL_APOIAR || "https://gateway.apiserpro.serpro.gov.br/integra-contador/v1/Apoiar";
 const API_URL_EMITIR = process.env.API_URL_EMITIR || "https://gateway.apiserpro.serpro.gov.br/integra-contador/v1/Emitir";
 
-const CONTRATANTE_CNPJ = process.env.CONTRATANTE_CNPJ || "06310711000149";
+const CONTRATANTE_CNPJ = process.env.CONTRATANTE_CNPJ || "";
 
 // Verificar se as variáveis essenciais estão definidas
 if (!CONSUMER_KEY || !CONSUMER_SECRET) {
@@ -66,7 +66,7 @@ const contribuintes = lerCNPJsDoExcel();
 // ==========================
 // PASTAS DE SAÍDA
 // ==========================
-const pdfDir = path.join(__dirname, "pdfs");
+const pdfDir = path.join(__dirname, "ReportX");
 const jsonDir = path.join(__dirname, "json_responses");
 const logsDir = path.join(__dirname, "logs");
 if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir);

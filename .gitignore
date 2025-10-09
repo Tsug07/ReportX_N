@@ -22,7 +22,7 @@ json_responses/
 # Arquivos Excel (podem conter dados sensíveis)
 *.xlsx
 *.xls
-
+excel/*
 # Arquivos temporários
 *.tmp
 *.temp
