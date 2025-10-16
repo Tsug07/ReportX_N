@@ -19,7 +19,6 @@
       flex-direction: column;
     }
 
-    /* 🔹 Barra superior estilo app */
     .titlebar {
       -webkit-app-region: drag;
       height: 40px;
@@ -42,27 +41,6 @@
       flex: 1;
     }
 
-    .titlebar .buttons {
-      margin-left: auto;
-      display: flex;
-      gap: 10px;
-      -webkit-app-region: no-drag;
-    }
-
-    .titlebar button {
-      border: none;
-      background: transparent;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-
-    .titlebar button:hover {
-      transform: scale(1.2);
-    }
-
-    /* 🔹 Container principal - layout horizontal */
     .container {
       flex: 1;
       background: white;
@@ -129,7 +107,7 @@
       cursor: pointer;
     }
 
-    .file-input-button, .folder-select-button {
+    .file-input-button {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -145,12 +123,12 @@
       margin-bottom: 5px;
     }
 
-    .file-input-button:hover, .folder-select-button:hover {
+    .file-input-button:hover {
       background: #e9ecef;
       border-color: #adb5bd;
     }
 
-    .file-input-button.has-file, .folder-select-button.has-folder {
+    .file-input-button.has-file {
       background: #d4edda;
       border-color: #28a745;
       color: #155724;
@@ -208,7 +186,7 @@
     }
 
     .status {
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 15px;
       height: 100%;
@@ -218,6 +196,17 @@
       margin-bottom: 10px;
       color: #333;
       font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: #e9ecef;
+      color: #666;
     }
 
     .status-content {
@@ -230,6 +219,7 @@
       font-size: 11px;
       white-space: pre-wrap;
       border: 1px solid #dee2e6;
+      max-height: 300px;
     }
 
     .success-log {
@@ -240,67 +230,153 @@
       color: #dc3545;
     }
 
-    .folder-input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .manual-input {
-      display: none;
-    }
-
-    .toggle-manual {
-      background: none;
-      border: none;
-      color: #667eea;
-      text-decoration: underline;
-      cursor: pointer;
-      font-size: 12px;
-      align-self: flex-start;
-    }
-
-    .selected-path {
-      background: #e3f2fd;
-      padding: 8px 12px;
-      border-radius: 5px;
-      font-size: 12px;
-      color: #1976d2;
-      margin-top: 5px;
-      word-break: break-all;
-    }
-
-    .empty-state {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #999;
-      font-size: 14px;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .logoImg{
+    .logoImg {
       height: 50px;
       width: 50px;
       align-self: center;
     }
+
+    .debug-info {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-family: monospace;
+      max-width: 300px;
+      display: none;
+    }
+
+    .connection-status {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: 8px;
+    }
+
+    .connection-status.connected {
+      background: #28a745;
+    }
+
+    .connection-status.disconnected {
+      background: #dc3545;
+    }
+
+    .close-btn {
+      -webkit-app-region: no-drag;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+      width: 40px;
+      height: 40px;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .notification-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .notification-modal.show {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .notification-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease;
+    }
+
+    .notification-content .icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+
+    .notification-content h2 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .notification-content p {
+      color: #666;
+      margin-bottom: 20px;
+      font-size: 14px;
+      white-space: pre-line;
+    }
+
+    .notification-content button {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .notification-content button:hover {
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .status-badge.pulsing {
+      animation: pulse 2s infinite;
+    }
   </style>
 </head>
 <body>
-  <!-- Barra superior -->
   <div class="titlebar">
     <img src="RelaEcac_logo-removebg.png" alt="Logo">
-    <span>RelaEcac</span>
-    <div class="buttons">
-      <button onclick="window.close()">✖</button>
-    </div>
+    <span>RelaEcac <span class="connection-status" id="connectionStatus"></span></span>
+    <button id="closeBtn" class="close-btn" title="Fechar">✖</button>
   </div>
 
-  <!-- Conteúdo -->
   <div class="container">
-    <!-- Seção do Formulário -->
     <div class="form-section">
       <div class="header">
         <img class="logoImg" src="RelaEcac_logo-removebg.png" alt="logo">
@@ -327,21 +403,15 @@
 
         <div class="form-group">
           <label>📁 Pasta para Salvar PDFs</label>
-          <div class="folder-input-group">
-            <button type="button" class="folder-select-button" id="folderSelectBtn">
-              📂 Clique para selecionar a pasta
-            </button>
-            <div class="selected-path" id="selectedPath" style="display: none;"></div>
-            <button type="button" class="toggle-manual" id="toggleManual">
-              Ou digite o caminho manualmente
-            </button>
-            <div class="manual-input" id="manualInput">
-              <input type="text" id="pdfDir" name="pdfDir" placeholder="Ex: C:\Relatorios ou relatorios_2024">
-              <div class="hint">Caminho absoluto (C:\pasta) ou relativo (nome_pasta)</div>
-            </div>
+          <div class="hint" style="margin-bottom: 10px; color: #dc3545; font-weight: 600;">
+            ⚠️ Digite o caminho completo (ex: C:\Relatorios) ou deixe vazio para usar a pasta padrão
           </div>
-          <div class="hint">Deixe em branco para usar a pasta padrão 'pdfs'</div>
-          <input type="hidden" id="selectedFolderPath" name="selectedFolderPath">
+          <input type="text" id="pdfDir" name="pdfDir" placeholder="Ex: C:\Relatorios (ou deixe vazio)">
+          <div class="hint">
+            • Caminho completo: <strong>C:\Relatorios</strong> ou <strong>C:\Users\SeuNome\Desktop\PDFs</strong><br>
+            • Pasta relativa: <strong>relatorios_2024</strong> (cria dentro do AppData)<br>
+            • Deixe vazio para usar a pasta padrão <strong>pdfs</strong>
+          </div>
         </div>
 
         <div class="form-group">
@@ -365,121 +435,148 @@
       </div>
     </div>
 
-    <!-- Seção de Logs -->
     <div class="logs-section">
       <div class="status" id="status">
         <div>
-          <h3>✅ Sucessos</h3>
+          <h3>
+            ✅ Sucessos 
+            <span class="status-badge" id="successBadge">Aguardando</span>
+          </h3>
           <div class="status-content success-log" id="successLog">Aguardando processamento...</div>
         </div>
         <div>
-          <h3>❌ Erros</h3>
+          <h3>
+            ❌ Erros
+            <span class="status-badge" id="errorBadge">0 erros</span>
+          </h3>
           <div class="status-content error-log" id="errorLog">Nenhum erro registrado...</div>
         </div>
-      </div>
-      <div class="empty-state" id="emptyState">
-        📋 Os logs aparecerão aqui durante o processamento
       </div>
     </div>
   </div>
 
-  <script>
-    let selectedFolderHandle = null;
-    const supportsFolderPicker = 'showDirectoryPicker' in window;
+  <div class="notification-modal" id="notificationModal">
+    <div class="notification-content">
+      <div class="icon">🎉</div>
+      <h2>Processamento Concluído!</h2>
+      <p id="notificationMessage">Todos os relatórios foram gerados com sucesso.</p>
+      <button onclick="fecharNotificacao()">OK, Entendi!</button>
+    </div>
+  </div>
 
-    // Certificado
+  <div class="debug-info" id="debugInfo">
+    <div>Debug Mode</div>
+    <div id="debugContent"></div>
+  </div>
+
+  <script>
+    let monitoramentoAtivo = false;
+    let intervaloMonitoramento = null;
+
+    function mostrarNotificacao(tipo, mensagem) {
+      const modal = document.getElementById('notificationModal');
+      const icon = modal.querySelector('.icon');
+      const title = modal.querySelector('h2');
+      const message = document.getElementById('notificationMessage');
+
+      if (tipo === 'success') {
+        icon.textContent = '🎉';
+        title.textContent = 'Processamento Concluído!';
+      } else if (tipo === 'error') {
+        icon.textContent = '❌';
+        title.textContent = 'Erro no Processamento';
+      }
+
+      message.textContent = mensagem;
+      modal.classList.add('show');
+    }
+
+    function fecharNotificacao() {
+      document.getElementById('notificationModal').classList.remove('show');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        const debugInfo = document.getElementById('debugInfo');
+        debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+
+    function addDebug(msg) {
+      const debugContent = document.getElementById('debugContent');
+      const timestamp = new Date().toLocaleTimeString();
+      debugContent.innerHTML = `[${timestamp}] ${msg}<br>` + debugContent.innerHTML;
+      console.log(`[DEBUG] ${msg}`);
+    }
+
+    async function testarConexao() {
+      const statusIndicator = document.getElementById('connectionStatus');
+      try {
+        const response = await fetch('http://localhost:3000/config');
+        if (response.ok) {
+          statusIndicator.className = 'connection-status connected';
+          addDebug('✅ Conectado ao servidor');
+          return true;
+        }
+      } catch (error) {
+        statusIndicator.className = 'connection-status disconnected';
+        addDebug('❌ Servidor desconectado: ' + error.message);
+        return false;
+      }
+    }
+
     document.getElementById('certificado').addEventListener('change', function(e) {
       const button = document.getElementById('certificadoButton');
       if (e.target.files.length > 0) {
         button.textContent = `📜 ${e.target.files[0].name}`;
         button.classList.add('has-file');
+        addDebug('Certificado selecionado: ' + e.target.files[0].name);
       } else {
         button.textContent = '📁 Clique para selecionar novo certificado (opcional)';
         button.classList.remove('has-file');
       }
     });
 
-    // Excel
     document.getElementById('excel').addEventListener('change', function(e) {
       const button = document.getElementById('excelButton');
       if (e.target.files.length > 0) {
         button.textContent = `📊 ${e.target.files[0].name}`;
         button.classList.add('has-file');
+        addDebug('Excel selecionado: ' + e.target.files[0].name);
       } else {
         button.textContent = '📁 Clique para selecionar o arquivo Excel';
         button.classList.remove('has-file');
       }
     });
 
-    // Seleção de pasta
-    document.getElementById('folderSelectBtn').addEventListener('click', async function() {
-      if (supportsFolderPicker) {
-        try {
-          selectedFolderHandle = await window.showDirectoryPicker();
-          const folderName = selectedFolderHandle.name;
-
-          const button = document.getElementById('folderSelectBtn');
-          const pathDiv = document.getElementById('selectedPath');
-          const hiddenInput = document.getElementById('selectedFolderPath');
-
-          button.textContent = `📂 ${folderName}`;
-          button.classList.add('has-folder');
-          pathDiv.textContent = `Pasta selecionada: ${folderName}`;
-          pathDiv.style.display = 'block';
-
-          hiddenInput.value = folderName;
-        } catch (error) {
-          if (error.name !== 'AbortError') {
-            alert('Erro ao selecionar pasta: ' + error.message);
-          }
-        }
-      } else {
-        alert('Seu navegador não suporta seleção de pasta. Use o campo manual abaixo.');
-        document.getElementById('toggleManual').click();
-      }
-    });
-
-    // Toggle manual
-    document.getElementById('toggleManual').addEventListener('click', function() {
-      const manualInput = document.getElementById('manualInput');
-      const isVisible = manualInput.style.display !== 'none';
-
-      if (isVisible) {
-        manualInput.style.display = 'none';
-        this.textContent = 'Ou digite o caminho manualmente';
-      } else {
-        manualInput.style.display = 'block';
-        this.textContent = 'Usar seletor de pasta';
-        document.getElementById('pdfDir').focus();
-      }
-    });
-
-    // Carregar config
     async function carregarConfiguracoes() {
       try {
-        const response = await fetch('/config');
+        addDebug('Carregando configurações...');
+        const response = await fetch('http://localhost:3000/config');
         const config = await response.json();
-        if (config.certPassword) document.getElementById('senha').value = config.certPassword;
-        if (config.pdfDir) document.getElementById('pdfDir').value = config.pdfDir;
+        
+        if (config.certPassword) {
+          document.getElementById('senha').value = config.certPassword;
+          addDebug('Senha carregada do config');
+        }
+        if (config.pdfDir) {
+          document.getElementById('pdfDir').value = config.pdfDir;
+          addDebug('PdfDir carregado: ' + config.pdfDir);
+        }
       } catch (error) {
         console.error('Erro ao carregar configurações:', error);
+        addDebug('❌ Erro ao carregar config: ' + error.message);
       }
     }
 
-    // Submit
     document.getElementById('relatoriosForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const formData = new FormData(e.target);
+      const pdfDirValue = document.getElementById('pdfDir').value.trim();
 
-      const selectedPath = document.getElementById('selectedFolderPath').value;
-      const manualPath = document.getElementById('pdfDir').value;
-
-      if (selectedPath) {
-        formData.set('pdfDir', selectedPath);
-      } else if (manualPath) {
-        formData.set('pdfDir', manualPath);
-      }
+      console.log('📁 Valor do campo pdfDir:', pdfDirValue);
+      addDebug('📁 Caminho digitado: ' + (pdfDirValue || 'vazio (usará padrão)'));
 
       const submitBtn = document.getElementById('submitBtn');
       const loading = document.getElementById('loading');
@@ -488,62 +585,145 @@
       loading.style.display = 'block';
 
       try {
-        const response = await fetch('/processar', {
+        addDebug('Enviando requisição para /processar...');
+        const response = await fetch('http://localhost:3000/processar', {
           method: 'POST',
           body: formData
         });
 
+        addDebug('Resposta recebida: ' + response.status);
         const result = await response.json();
 
         if (result.success) {
-          alert('✅ ' + result.message);
+          addDebug('✅ Sucesso: ' + result.message);
           iniciarMonitoramento();
         } else {
           alert('❌ ' + result.message);
+          addDebug('❌ Erro: ' + result.message);
         }
       } catch (error) {
         alert('❌ Erro: ' + error.message);
+        addDebug('❌ Exceção: ' + error.message);
       } finally {
         submitBtn.disabled = false;
         loading.style.display = 'none';
       }
     });
 
-    // Monitoramento de status
     function iniciarMonitoramento() {
-      const statusDiv = document.getElementById('status');
-      const emptyState = document.getElementById('emptyState');
-      
-      statusDiv.style.display = 'flex';
-      emptyState.style.display = 'none';
+      if (monitoramentoAtivo) {
+        addDebug('⚠️ Monitoramento já está ativo');
+        return;
+      }
 
-      const intervalo = setInterval(async () => {
+      monitoramentoAtivo = true;
+      addDebug('🔄 Iniciando monitoramento de logs...');
+
+      const successBadge = document.getElementById('successBadge');
+      const errorBadge = document.getElementById('errorBadge');
+
+      successBadge.textContent = 'Monitorando...';
+      successBadge.style.background = '#ffc107';
+      successBadge.classList.add('pulsing');
+
+      intervaloMonitoramento = setInterval(async () => {
         try {
-          const response = await fetch('/status');
+          const response = await fetch('http://localhost:3000/status');
+          
+          if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+          }
+
           const status = await response.json();
+          
+          addDebug(`📊 Status: ${status.success?.length || 0} chars success, ${status.errors?.length || 0} chars errors`);
 
-          document.getElementById('successLog').textContent = status.success || 'Nenhum log de sucesso ainda...';
-          document.getElementById('errorLog').textContent = status.errors || 'Nenhum erro registrado...';
+          const successLog = document.getElementById('successLog');
+          const errorLog = document.getElementById('errorLog');
 
-          if (status.success && status.success.includes('✅ Processamento concluído')) {
-            alert('🎉 Processamento finalizado!');
-            clearInterval(intervalo);
+          if (status.success) {
+            successLog.textContent = status.success;
+            successLog.scrollTop = successLog.scrollHeight;
+          }
+
+          if (status.errors) {
+            errorLog.textContent = status.errors;
+            errorLog.scrollTop = errorLog.scrollHeight;
+            
+            const errorCount = (status.errors.match(/❌/g) || []).length;
+            errorBadge.textContent = errorCount > 0 ? `${errorCount} erro(s)` : '0 erros';
+            errorBadge.style.background = errorCount > 0 ? '#dc3545' : '#28a745';
+            errorBadge.style.color = 'white';
+          }
+
+          if (status.success && status.success.includes('✅ Processamento concluído com sucesso!')) {
+            addDebug('🎉 Processamento concluído');
+            pararMonitoramento();
+            
+            successBadge.textContent = 'Concluído';
+            successBadge.style.background = '#28a745';
+            successBadge.style.color = 'white';
+            successBadge.classList.remove('pulsing');
+
+            const pdfPath = status.success.match(/📁 PDFs salvos em: (.+)/);
+            const totalProcessados = status.success.match(/📊 Total de protocolos processados: (\d+)/);
+            
+            let mensagem = 'Todos os relatórios foram gerados com sucesso.';
+            if (pdfPath && pdfPath[1]) {
+              mensagem += `\n\nPDFs salvos em:\n${pdfPath[1]}`;
+            }
+            if (totalProcessados && totalProcessados[1]) {
+              mensagem += `\n\nTotal processado: ${totalProcessados[1]} empresa(s)`;
+            }
+            
+            mostrarNotificacao('success', mensagem);
           }
         } catch (error) {
           console.error('Erro ao buscar status:', error);
+          addDebug('❌ Erro ao buscar status: ' + error.message);
+          
+          const conectado = await testarConexao();
+          if (!conectado) {
+            pararMonitoramento();
+            mostrarNotificacao('error', 'Conexão perdida com o servidor. Verifique se o servidor está rodando.');
+          }
         }
-      }, 3000);
+      }, 2000);
 
-      setTimeout(() => clearInterval(intervalo), 300000);
+      setTimeout(() => {
+        if (monitoramentoAtivo) {
+          addDebug('⏱️ Timeout de monitoramento (5 min)');
+          pararMonitoramento();
+        }
+      }, 300000);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      if (!supportsFolderPicker) {
-        document.getElementById('folderSelectBtn').textContent = '📂 Seleção de pasta não suportada';
-        document.getElementById('folderSelectBtn').style.opacity = '0.5';
-        document.getElementById('toggleManual').click();
+    function pararMonitoramento() {
+      if (intervaloMonitoramento) {
+        clearInterval(intervaloMonitoramento);
+        intervaloMonitoramento = null;
       }
-      carregarConfiguracoes();
+      monitoramentoAtivo = false;
+      addDebug('⏹️ Monitoramento parado');
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      addDebug('🚀 Aplicação iniciada');
+      await testarConexao();
+      await carregarConfiguracoes();
+      setInterval(testarConexao, 10000);
+    });
+
+    window.addEventListener('beforeunload', () => {
+      pararMonitoramento();
+    });
+
+    document.getElementById('closeBtn').addEventListener('click', () => {
+      if (window.electronAPI && window.electronAPI.closeApp) {
+        window.electronAPI.closeApp();
+      } else {
+        window.close();
+      }
     });
   </script>
 </body>
